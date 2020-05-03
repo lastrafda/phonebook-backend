@@ -1,11 +1,16 @@
 const express = require('express')
+const morgan = require('morgan')
+const fs = require('fs')
+const path = require('path')
 const app = express()
 
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+
 app.use(express.json())
-const unkownEndpoint = (req, res) => {
-	res.status(404).send({ error: 'unknown endpoint' })
-}
-app.use(unkownEndpoint)
+
+
+app.use(morgan('tiny', { stream: accessLogStream }))
 
 let persons = [
 	{
@@ -84,6 +89,11 @@ app.delete('/api/persons/:id', (req, res) => {
 
 	res.status(204).end()
 })
+
+const unkownEndpoint = (req, res) => {
+	res.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unkownEndpoint)
 
 const PORT = 3001
 app.listen(PORT, () => {
