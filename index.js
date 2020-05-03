@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let persons = [
 	{
 		id: 1,
@@ -24,6 +26,10 @@ let persons = [
 	}
 ]
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
 app.get('/info', (req, res) => {
 	const total = persons.length
 	res.send(`<p>Phonebook has info for ${total} people</p><br><p>${new Date()}</p>`)
@@ -41,6 +47,31 @@ app.get('/api/persons/:id', (req, res) => {
 	} else {
 		res.status(404).end()
 	}
+})
+
+app.post('/api/persons', (req, res) => {
+	const body = req.body
+	if (!body.name || !body.number) {
+		return res.status(400).json({
+			error: 'name or number missing'
+		})
+	}
+	const foundName = persons.find(p => {
+		return p.name === body.name;
+	})
+	if (foundName) {
+		return res.status(400).json({
+			error: 'name must be unique'
+		})
+	}
+
+	const person = {
+		id: getRandomInt(1000000),
+		name: body.name,
+		number: body.number
+	}
+	persons = persons.concat(person)
+	res.json(person)
 })
 
 app.delete('/api/persons/:id', (req, res) => {
