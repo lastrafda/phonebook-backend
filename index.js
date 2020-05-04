@@ -3,13 +3,14 @@ const morgan = require('morgan')
 const fs = require('fs')
 const path = require('path')
 const app = express()
+const cors = require('cors')
 
 // create a write stream (in append mode)
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 
 app.use(express.json())
-
-morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
+app.use(cors())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', { stream: accessLogStream }))
 
 let persons = [
